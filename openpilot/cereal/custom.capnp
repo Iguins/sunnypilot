@@ -447,6 +447,13 @@ struct BackupManagerSP @0xf98d843bfd7004a3 {
 
 struct CarStateSP @0xb86e6369214c01c8 {
   speedLimit @0 :Float32;
+  routeTurn @1 :RouteTurn;
+
+  # the next turn on the car's own navigation route, for cars that report one (Fisker: its head unit's ADASIS horizon)
+  struct RouteTurn {
+    direction @0 :ModelDataV2SP.TurnDirection;
+    distance @1 :Float32;  # m along the road to the turn point, negative once past it
+  }
 }
 
 struct LiveMapDataSP @0xf416ec09499d9d19 {
