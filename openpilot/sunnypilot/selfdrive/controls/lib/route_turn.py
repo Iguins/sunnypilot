@@ -15,6 +15,7 @@ TurnDirection = custom.ModelDataV2SP.TurnDirection
 
 ROUTE_TURN_START = 30.0  # m before the turn point the model is asked to turn
 ROUTE_TURN_END = -15.0   # m past it the request ends
+ROUTE_TURN_PROMPT = 150.0  # m before the turn point the driver is asked to signal it
 LANE_TURN_SPEED_MAX = 20 * CV.MPH_TO_MS
 
 
@@ -31,5 +32,16 @@ def route_turn_desire(route_turn, left_blinker: bool, right_blinker: bool, blind
   if route_turn.direction == TurnDirection.turnLeft and left_blinker and not right_blinker and not blindspot_left:
     return TurnDirection.turnLeft
   if route_turn.direction == TurnDirection.turnRight and right_blinker and not left_blinker and not blindspot_right:
+    return TurnDirection.turnRight
+  return TurnDirection.none
+
+
+def route_turn_prompt(route_turn, left_blinker: bool, right_blinker: bool):
+  """The route turn the driver should signal now (coming up, not yet signalled), else TurnDirection.none."""
+  if route_turn is None or not ROUTE_TURN_START < route_turn.distance <= ROUTE_TURN_PROMPT:
+    return TurnDirection.none
+  if route_turn.direction == TurnDirection.turnLeft and not left_blinker:
+    return TurnDirection.turnLeft
+  if route_turn.direction == TurnDirection.turnRight and not right_blinker:
     return TurnDirection.turnRight
   return TurnDirection.none

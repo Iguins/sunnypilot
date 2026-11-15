@@ -6,7 +6,7 @@ from openpilot.common.test import OpenpilotTestCase
 from openpilot.selfdrive.controls.lib.desire_helper import DesireHelper, LaneChangeState, LaneChangeDirection
 from openpilot.sunnypilot.selfdrive.controls.lib.lane_turn_desire import LaneTurnController, LANE_CHANGE_SPEED_MIN
 from openpilot.sunnypilot.selfdrive.controls.lib.auto_lane_change import AutoLaneChangeMode
-from openpilot.sunnypilot.selfdrive.controls.lib.route_turn import ROUTE_TURN_END, ROUTE_TURN_START
+from openpilot.sunnypilot.selfdrive.controls.lib.route_turn import ROUTE_TURN_END, ROUTE_TURN_PROMPT, ROUTE_TURN_START, route_turn_prompt
 
 
 TurnDirection = custom.ModelDataV2SP.TurnDirection
@@ -90,6 +90,19 @@ class TestLaneTurnDesire(OpenpilotTestCase):
     route_turn = custom.CarStateSP.RouteTurn.new_message(direction=direction, distance=distance)
     controller.update_lane_turn(False, blindspot_right, left_blinker, right_blinker, v_ego, route_turn=route_turn)
     assert controller.get_turn_direction() == expected
+
+  @parameterized.expand([
+    ("turnLeft", 100.0, False, False, TurnDirection.turnLeft),
+    ("turnRight", ROUTE_TURN_PROMPT, False, False, TurnDirection.turnRight),
+    ("turnLeft", 100.0, False, True, TurnDirection.turnLeft),  # the other blinker is not the route's turn
+    ("turnLeft", 100.0, True, False, TurnDirection.none),  # signalled: nothing to ask
+    ("turnLeft", ROUTE_TURN_PROMPT + 1, False, False, TurnDirection.none),
+    ("turnLeft", ROUTE_TURN_START, False, False, TurnDirection.none),  # the turn request has started
+    ("none", 100.0, False, False, TurnDirection.none),
+  ])
+  def test_route_turn_prompt(self, direction, distance, left_blinker, right_blinker, expected):
+    route_turn = custom.CarStateSP.RouteTurn.new_message(direction=direction, distance=distance)
+    assert route_turn_prompt(route_turn, left_blinker, right_blinker) == expected
 
 
 class DummyCarState:
