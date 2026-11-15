@@ -276,4 +276,12 @@ EVENTS_SP: dict[int, dict[str, Alert | AlertCallbackType]] = {
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.prompt, 1.),
   },
+
+  EventNameSP.steeringYielded: {
+    ET.WARNING: Alert(
+      "You Are Steering",
+      "sunnypilot resumes when you let go",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.MID, VisualAlert.none, AudibleAlert.none, .5),
+  },
 }

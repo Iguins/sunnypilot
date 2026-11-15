@@ -356,6 +356,7 @@ struct OnroadEventSP @0xda96579883444c35 {
     bigModelReady @25;
     routeTurnLeftAhead @26;
     routeTurnRightAhead @27;
+    steeringYielded @28;
   }
 }
 
@@ -450,6 +451,7 @@ struct BackupManagerSP @0xf98d843bfd7004a3 {
 struct CarStateSP @0xb86e6369214c01c8 {
   speedLimit @0 :Float32;
   routeTurn @1 :RouteTurn;
+  steeringYielded @2 :Bool;  # lateral engaged, but the car port has stopped steering and left the wheel to the driver
 
   # the next turn on the car's own navigation route, for cars that report one (Fisker: its head unit's ADASIS horizon)
   struct RouteTurn {

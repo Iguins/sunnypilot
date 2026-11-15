@@ -386,6 +386,10 @@ class SelfdriveD(CruiseHelper):
       elif route_turn_signal == TurnDirection.turnRight:
         self.events_sp.add(custom.OnroadEventSP.EventName.routeTurnRightAhead)
 
+    # The car port has stopped steering and left the wheel to the driver while lateral is engaged
+    if self.sm['carStateSP'].steeringYielded:
+      self.events_sp.add(custom.OnroadEventSP.EventName.steeringYielded)
+
     for i, pandaState in enumerate(self.sm['pandaStates']):
       # All pandas must match the list of safetyConfigs, and if outside this list, must be silent or noOutput
       if i < len(self.CP.safetyConfigs):
