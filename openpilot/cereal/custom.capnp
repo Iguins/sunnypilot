@@ -357,8 +357,6 @@ struct OnroadEventSP @0xda96579883444c35 {
     routeTurnLeftAhead @26;
     routeTurnRightAhead @27;
     steeringYielded @28;
-    stopAssistSlowing @29;
-    stopAssistBrake @30;
   }
 }
 
@@ -388,14 +386,6 @@ struct CarControlSP @0xa5cd762cd951a455 {
   leadOne @2 :LeadData;
   leadTwo @3 :LeadData;
   intelligentCruiseButtonManagement @4 :IntelligentCruiseButtonManagement;
-  stopAssist @5 :StopAssist;
-
-  # the driving model predicts a stop ahead, for ports where the car's own ACC drives and the port can only
-  # lower its request (Fisker)
-  struct StopAssist {
-    active @0 :Bool;
-    accel @1 :Float32;  # m/s^2, the model's desired acceleration
-  }
 
   struct Param {
     key @0 :Text;
@@ -462,13 +452,6 @@ struct CarStateSP @0xb86e6369214c01c8 {
   speedLimit @0 :Float32;
   routeTurn @1 :RouteTurn;
   steeringYielded @2 :Bool;  # lateral engaged, but the car port has stopped steering and left the wheel to the driver
-  stopAssist @3 :StopAssistState;
-
-  enum StopAssistState {
-    off @0;
-    slowing @1;      # lowering the car's own ACC request for a predicted stop
-    brakeToStop @2;  # still slowing, the driver should brake to finish the stop
-  }
 
   # the next turn on the car's own navigation route, for cars that report one (Fisker: its head unit's ADASIS horizon)
   struct RouteTurn {
