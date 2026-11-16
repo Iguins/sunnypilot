@@ -390,6 +390,13 @@ class SelfdriveD(CruiseHelper):
     if self.sm['carStateSP'].steeringYielded:
       self.events_sp.add(custom.OnroadEventSP.EventName.steeringYielded)
 
+    # The car port is slowing the car's own ACC for a stop the model predicts, and wants the driver to finish it
+    stop_assist = self.sm['carStateSP'].stopAssist
+    if stop_assist == custom.CarStateSP.StopAssistState.slowing:
+      self.events_sp.add(custom.OnroadEventSP.EventName.stopAssistSlowing)
+    elif stop_assist == custom.CarStateSP.StopAssistState.brakeToStop:
+      self.events_sp.add(custom.OnroadEventSP.EventName.stopAssistBrake)
+
     for i, pandaState in enumerate(self.sm['pandaStates']):
       # All pandas must match the list of safetyConfigs, and if outside this list, must be silent or noOutput
       if i < len(self.CP.safetyConfigs):
