@@ -136,6 +136,7 @@ class SelfdriveD(CruiseHelper):
     self.active = False
     self.mismatch_counter = 0
     self.cruise_mismatch_counter = 0
+    self.last_takeover_held_frame = -1_000_000
     self.last_steering_pressed_frame = 0
     self.distance_traveled = 0
     self.last_functional_fan_frame = 0
@@ -390,6 +391,20 @@ class SelfdriveD(CruiseHelper):
     if self.sm['carStateSP'].steeringYielded:
       self.events_sp.add(custom.OnroadEventSP.EventName.steeringYielded)
 
+    # The car port is slowing the car's own ACC for a stop the model predicts, and wants the driver to finish it
+    stop_assist = self.sm['carStateSP'].stopAssist
+    if stop_assist == custom.CarStateSP.StopAssistState.slowing:
+      self.events_sp.add(custom.OnroadEventSP.EventName.stopAssistSlowing)
+    elif stop_assist == custom.CarStateSP.StopAssistState.brakeToStop:
+      self.events_sp.add(custom.OnroadEventSP.EventName.stopAssistBrake)
+
+    # card still keeps the panda in pass-through, the car as stock, until the car port is ready (Fisker: its ADAS has started)
+    if self.sm['carStateSP'].takeoverHeld:
+      self.last_takeover_held_frame = self.sm.frame
+      self.events_sp.add(custom.OnroadEventSP.EventName.takeoverHeld)
+    # pandad switches the panda's safety mode up to ~0.2 s after the hold ends
+    takeover_settling = self.sm.frame - self.last_takeover_held_frame < int(2. / DT_CTRL)
+
     for i, pandaState in enumerate(self.sm['pandaStates']):
       # All pandas must match the list of safetyConfigs, and if outside this list, must be silent or noOutput
       if i < len(self.CP.safetyConfigs):
@@ -400,7 +415,8 @@ class SelfdriveD(CruiseHelper):
         safety_mismatch = pandaState.safetyModel not in IGNORED_SAFETY_MODES
 
       # safety mismatch allows some time for pandad to set the safety mode and publish it back from panda
-      if (safety_mismatch and self.sm.frame*DT_CTRL > 10.) or pandaState.safetyRxChecksInvalid or self.mismatch_counter >= 200:
+      if (safety_mismatch and self.sm.frame*DT_CTRL > 10. and not takeover_settling) or pandaState.safetyRxChecksInvalid or \
+         self.mismatch_counter >= 200:
         self.events.add(EventName.controlsMismatch)
 
       if log.PandaState.FaultType.relayMalfunction in pandaState.faults:

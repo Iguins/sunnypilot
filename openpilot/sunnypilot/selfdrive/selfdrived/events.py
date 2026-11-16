@@ -284,4 +284,24 @@ EVENTS_SP: dict[int, dict[str, Alert | AlertCallbackType]] = {
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.MID, VisualAlert.none, AudibleAlert.none, .5),
   },
+
+  EventNameSP.stopAssistSlowing: {
+    ET.WARNING: Alert(
+      "Slowing for Stop",
+      "Be ready to brake",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .2),
+  },
+
+  EventNameSP.stopAssistBrake: {
+    ET.WARNING: Alert(
+      "Brake to Stop",
+      "Stop assist won't hold the car",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.MID, VisualAlert.none, AudibleAlert.prompt, .2),
+  },
+
+  EventNameSP.takeoverHeld: {
+    ET.NO_ENTRY: NoEntryAlert("Waiting for Car Systems to Start"),
+  },
 }
